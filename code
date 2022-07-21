@@ -1,0 +1,21 @@
+#Checks the Disk Space of the computer
+$EmailSMTPServer = '172.31.x.x'
+$EmailFrom = 'powershell@yourdoamin.com'
+$EmailNoticeTo = 'help.desk@yourdomain.com'
+$EmailNoticeSubject = 'Hard Drive Space Warning - ' + (Get-Date -Format "MM/dd/yyyy HH:mm")
+
+
+
+
+$percentWarning = 8
+$ListDisk = Get-WmiObject -Class Win32_LogicalDisk -Filter 'DeviceID = "C:"'
+Foreach($Disk in $ListDisk){
+if ($Disk.size -ne $NULL) {
+$DiskFreeSpace = ($Disk.freespace/1GB).ToString('F2')
+$DiskFreeSpacePercent = [Math]::Round(($Disk.freespace/$Disk.size) * 100, 2)
+if($DiskFreeSpacePercent -lt $percentWarning){
+$EmailBody = "I have noticed the hard drive space for $env:Computername.yourdomain.local is very low. I have calculated it to be at $DiskFreeSpace GB left.`r`nPlease resolve the situation"
+Send-MailMessage -From $EmailFrom -To $EmailNoticeTo -Subject $EmailNoticeSubject -Body $EmailBody -SmtpServer $EmailSMTPServer
+}
+}
+}
